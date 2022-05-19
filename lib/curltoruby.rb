@@ -2,8 +2,7 @@
 
 # file: curltoruby.rb
 
-# description: Inspired by jhawthorn's curl-to-ruby.
-#              see https://jhawthorn.github.io/curl-to-ruby/
+# description: Inspired by jhawthorn's curl-to-ruby. see https://jhawthorn.github.io/curl-to-ruby/
 
 
 require 'lineparser'
@@ -12,9 +11,11 @@ require 'clipboard'
 
 class CurlToRuby
 
-  def initialize(s)
+  def initialize(s, debug: false)
+
+    @debug = debug
     @h = parse(s)
-    @s = build_code(@h)
+
   end
 
   def to_h()
@@ -23,8 +24,10 @@ class CurlToRuby
 
   def to_s()
 
+    @s = build_code(@h)
     Clipboard.copy @s
     puts 'copied to clipboard'
+
     @s
 
   end
@@ -67,7 +70,7 @@ EOF
 
   def parse(raws)
 
-    s = raws.gsub(/^\s+/,'')
+    s = raws.gsub(/^\s+/,'').gsub(/(-H|--data-raw)/, "\n" + '\0')
 
     patterns = [
       [:root, /(?<=curl ')([^']+)/, :url],
