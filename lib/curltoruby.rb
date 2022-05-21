@@ -36,22 +36,29 @@ class CurlToRuby
 
   def build_code(h)
 
-s=<<EOF
+s1=<<EOF
 require 'net/http'
 require 'uri'
 
 uri = URI.parse('#{h[:url]}')
+EOF
+
+    s2 = if @h[:header].grep(/Content-Type: application\/x-www-form-urlencoded/).any? then
+<<EOF
 request = Net::HTTP::Post.new(uri)
 request.body = '#{h[:body]}'
 request.content_type = "application/x-www-form-urlencoded; charset=UTF-8"
 EOF
+    else
+      "request = Net::HTTP::Get.new(uri)"
+    end
 
     headers = @h[:header].map do |x|
       key, value = x.split(/: +/,2)
       "request[\"%s\"] = \"%s\"" % [key, value.gsub(/"/,'\"')]
     end.join("\n")
 
-s2=<<EOF
+s3=<<EOF
 req_options = {
   use_ssl: uri.scheme == "https",
 }
@@ -64,7 +71,7 @@ end
 # response.body
 EOF
 
-    s + "\n" + headers + "\n" + s2
+    s1 + s2 + "\n" + headers + "\n" + s3
 
   end
 
