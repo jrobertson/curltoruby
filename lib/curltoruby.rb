@@ -43,11 +43,17 @@ require 'uri'
 uri = URI.parse('#{h[:url]}')
 EOF
 
-    s2 = if @h[:header].grep(/Content-Type: application\/x-www-form-urlencoded/).any? then
+    form = /Content-Type: application\/x-www-form-urlencoded/
+    s2 = if @h[:header].grep(form).any? then
 <<EOF
 request = Net::HTTP::Post.new(uri)
 request.body = '#{h[:body]}'
 request.content_type = "application/x-www-form-urlencoded; charset=UTF-8"
+EOF
+    elsif @h[:body]
+<<EOF
+request = Net::HTTP::Post.new(uri)
+request.body = '#{h[:body]}'
 EOF
     else
       "request = Net::HTTP::Get.new(uri)"
